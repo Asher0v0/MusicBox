@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=700, user-scalable=no">
-    <title>Echoes of the Nations - HKU Edition</title>
+    <title>Echoes of the Nations - Fixed Interaction</title>
     <style>
-        /* --- 全局设定 --- */
+        /* --- 1. 全局与背景 --- */
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
+            margin: 0; padding: 0; height: 100vh;
             background-color: #050505;
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
@@ -17,30 +15,20 @@
             background-size: 40px 40px;
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 50px; 
-            user-select: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 60px; user-select: none;
         }
 
-        /* --- 容器 --- */
+        /* --- 2. 容器 --- */
         .music-box-container {
-            position: relative;
-            width: 640px; 
-            height: 480px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            filter: drop-shadow(0 60px 80px rgba(0,0,0,0.8));
+            position: relative; width: 640px; height: 480px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            filter: drop-shadow(0 60px 80px rgba(0,0,0,0.9));
         }
 
-        /* --- 1. 顶部面板 --- */
+        /* --- 3. 顶部面板 --- */
         .music-box-top {
-            width: 592px; 
-            height: 110px; 
+            width: 592px; height: 110px; 
             background-color: #795548; 
             background-image: 
                 repeating-linear-gradient(90deg, rgba(0,0,0,0.04) 0px, transparent 1px, rgba(0,0,0,0.04) 2px),
@@ -49,270 +37,178 @@
             transform: perspective(1000px) rotateX(55deg);
             border-radius: 16px 16px 0 0;
             position: relative;
-            z-index: 5; 
-            margin-bottom: -5px; 
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
+            z-index: 5; margin-bottom: -5px; 
             border-top: 1px solid rgba(255,255,255,0.15);
             box-shadow: inset 0 5px 20px rgba(255,255,255,0.05);
+            display: flex; justify-content: center; align-items: flex-end;
         }
 
+        /* 顶部内容容器 */
         .top-content-wrapper {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; bottom: 0; width: 100%; height: 100%;
             transform: rotateX(-15deg);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 20px 8px 20px; 
-            box-sizing: border-box;
-            /* 移除 pointer-events: none 以允许点击子元素 */
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 0 20px 8px 20px; box-sizing: border-box;
+            /* 关键修复：让容器不阻挡点击，但子元素可以点击 */
+            pointer-events: none; 
         }
 
+        /* 中间组 */
         .top-center-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: -5px;
-            width: 360px;
-            pointer-events: none; /* 中间区域不需点击 */
+            display: flex; flex-direction: column; align-items: center;
+            width: 360px; margin-bottom: -5px;
+            pointer-events: auto; /* 允许点击控制条 */
         }
 
+        /* A. 复古控制条 */
+        .vintage-control-bar {
+            width: 320px; height: 24px; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: #2d1e1b; border-radius: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.3);
+            padding: 3px 6px; box-sizing: border-box;
+            pointer-events: auto; cursor: default;
+        }
+
+        .metal-btn {
+            width: 28px; height: 16px;
+            background: linear-gradient(to bottom, #d7ccc8, #8d6e63);
+            border: 1px solid #4e342e; border-radius: 2px;
+            cursor: pointer; box-shadow: 0 2px 3px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .metal-btn:active { transform: translateY(1px); box-shadow: 0 1px 1px rgba(0,0,0,0.5); background: linear-gradient(to bottom, #8d6e63, #6d4c41); }
+        
+        .symbol-play { width: 0; height: 0; border-style: solid; border-width: 4px 0 4px 6px; border-color: transparent transparent transparent #3e2723; display: none; }
+        .symbol-pause { width: 8px; height: 8px; border-left: 2px solid #3e2723; border-right: 2px solid #3e2723; display: none; }
+        .metal-btn.is-paused .symbol-play { display: block; }
+        .metal-btn.is-playing .symbol-pause { display: block; }
+
+        .scale-slot {
+            flex: 1; margin-left: 8px; height: 8px;
+            background: #150f0d; border-radius: 2px; position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,1);
+            cursor: pointer; overflow: hidden;
+        }
+        .scale-fill {
+            width: 0%; height: 100%;
+            background: #ffb74d; box-shadow: 0 0 5px #ffb74d;
+            opacity: 0.9; transition: width 0.1s linear;
+        }
+        .scale-marks {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 10px 100%; pointer-events: none;
+        }
+
+        /* B. 扬声器装饰孔 */
         .speaker-grille {
-            width: 340px;
-            height: 14px;
-            margin-bottom: 10px;
+            width: 340px; height: 14px; margin-bottom: 8px;
             background-image: radial-gradient(circle, #1a0e0c 40%, transparent 45%);
-            background-size: 8px 8px; 
-            background-position: center;
-            box-shadow: 0 1px 0 rgba(255,255,255,0.1); 
-            opacity: 0.9;
+            background-size: 8px 8px; background-position: center;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.15); opacity: 0.8;
+            pointer-events: none;
         }
 
+        /* C. 出纸口 */
         .slot-recess {
-            width: 360px;
-            height: 18px;
-            background: #020202;
-            border-radius: 6px;
-            box-shadow: inset 0 5px 10px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.08);
-            z-index: 20;
-            position: relative;
+            width: 360px; height: 18px;
+            background: #020202; border-radius: 6px;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.1);
+            z-index: 20; position: relative;
         }
 
-        /* 左侧装饰按钮 (纯装饰) */
-        .top-btn {
-            width: 34px; height: 34px;
-            border-radius: 50%;
+        /* 顶部两侧组件 */
+        .top-decor-left {
+            width: 34px; height: 34px; margin-bottom: 10px;
+            border-radius: 50%; pointer-events: auto;
             background: radial-gradient(circle at 30% 30%, #ffca28, #ff6f00);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            border: 2px solid #4e342e;
-            margin-bottom: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4); border: 2px solid #4e342e;
         }
         
-        /* 修改：右侧功能按钮 (Credits Button) */
+        /* 关键修复：Credits 按钮增加 z-index 和 pointer-events */
+        .top-decor-right {
+            pointer-events: auto;
+            z-index: 50; 
+        }
         .credits-btn-container {
-            width: 46px; height: 46px;
-            background: #3e2723;
-            border-radius: 50%;
-            border: 2px dashed #6d4c41;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            margin-bottom: 10px;
-            cursor: pointer; /* 变为手型 */
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 46px; height: 46px; margin-bottom: 10px;
+            background: #3e2723; border-radius: 50%;
+            border: 2px dashed #6d4c41; box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+        }
+        .credits-btn-cap {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #5d4037, #281815);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1);
             transition: transform 0.1s;
         }
+        .credits-btn-container:active .credits-btn-cap { transform: scale(0.95) translateY(1px); }
 
-        /* 按钮内部的帽 */
-        .credits-btn-cap {
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            /* 深褐色按钮 */
-            background: radial-gradient(circle at 30% 30%, #5d4037, #281815);
-            box-shadow: 
-                0 2px 4px rgba(0,0,0,0.5),
-                inset 0 1px 2px rgba(255,255,255,0.1);
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-
-        /* 按下效果 */
-        .credits-btn-container:active .credits-btn-cap {
-            transform: scale(0.95) translateY(1px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* --- 2. 正面面板 --- */
+        /* --- 4. 正面面板 --- */
         .music-box {
-            width: 600px;
-            height: 360px;
+            width: 600px; height: 360px;
             background-color: #3e2723;
             background-image: 
                 repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, transparent 2px, rgba(0,0,0,0.02) 4px),
                 linear-gradient(to bottom, #4e342e 0%, #281815 100%);
             border-radius: 24px; 
-            box-shadow: 
-                inset 0 1px 0 rgba(255,255,255,0.08), 
-                0 -4px 10px rgba(0,0,0,0.6),
-                inset 0 0 60px rgba(0,0,0,0.3),
-                0 0 0 1px #1a100d;
-            display: flex;
-            flex-direction: column;
-            padding: 35px;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 20;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 -4px 10px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.3), 0 0 0 1px #1a100d;
+            display: flex; flex-direction: column; padding: 35px; box-sizing: border-box;
+            position: relative; z-index: 20;
         }
 
-        /* --- 3. 纸张 --- */
+        /* --- 5. 纸张系统 --- */
         .card {
-            position: absolute;
-            width: 340px;
-            min-height: 160px;
+            position: absolute; width: 340px; min-height: 160px;
             background-color: #f7f3e8;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
-            padding: 25px;
-            box-sizing: border-box;
-            border: 1px solid #d7ccc8;
-            border-bottom: 3px solid #bcaaa4;
-            color: #222;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 15px;
-            line-height: 1.6;
+            padding: 25px; box-sizing: border-box;
+            border: 1px solid #d7ccc8; border-bottom: 3px solid #bcaaa4;
+            color: #222; font-family: 'Courier New', Courier, monospace;
+            font-size: 15px; line-height: 1.6;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 10; 
-            top: 110px; 
-            left: 50%;
-            margin-left: -170px;
-            opacity: 0;
-            transform-origin: center center;
-            transform: scale(0.98); 
+            top: 110px; left: 50%; margin-left: -170px;
+            opacity: 0; transform-origin: center center; transform: scale(0.98); 
         }
+        .card.credits-style { background-color: #fffbf0; border-top: 1px solid #a1887f; }
+        .card.printing { opacity: 1; animation: printOut 4s steps(120, end) forwards; }
+        @keyframes printOut { 0% { transform: translateY(0) scale(0.98) rotate(0deg); } 100% { transform: translateY(-280px) scale(1) rotate(var(--end-rot)); } }
+        .card.draggable { opacity: 1; cursor: grab; z-index: 1000 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border-radius: 2px; }
+        .card.draggable:active { cursor: grabbing; transform: scale(1.02) rotate(var(--end-rot)); box-shadow: 0 30px 60px rgba(0,0,0,0.35); }
 
-        /* 特殊样式：Credits 纸条 */
-        .card.credits-style {
-            background-color: #fffbf0; /* 稍微更白一点 */
-            border-top: 1px solid #a1887f;
-        }
-
-        .card.printing {
-            opacity: 1;
-            animation: printOut 4s steps(120, end) forwards;
-        }
-
-        @keyframes printOut {
-            0% { transform: translateY(0) scale(0.98) rotate(0deg); }
-            100% { transform: translateY(-280px) scale(1) rotate(var(--end-rot)); }
-        }
-
-        .card.draggable {
-            opacity: 1;
-            cursor: grab;
-            z-index: 1000 !important; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-            border-radius: 2px;
-        }
-        .card.draggable:active {
-            cursor: grabbing;
-            transform: scale(1.02) rotate(var(--end-rot));
-            box-shadow: 0 30px 60px rgba(0,0,0,0.35);
-        }
-
-        /* --- 螺丝 --- */
+        /* --- 6. 装饰细节 --- */
         .screw {
-            position: absolute;
-            width: 12px; height: 12px;
-            border-radius: 50%;
+            position: absolute; width: 12px; height: 12px; border-radius: 50%;
             background: radial-gradient(circle, #a1887f 0%, #3e2723 100%);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            z-index: 30;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.8); z-index: 30;
         }
-        .screw::after { 
-            content: ''; position: absolute;
-            top: 5px; left: 2px; width: 8px; height: 2px;
-            background: #1d1210; transform: rotate(45deg);
-        }
-        .s-tl { top: 14px; left: 14px; }
-        .s-tr { top: 14px; right: 14px; transform: rotate(20deg);}
-        .s-bl { bottom: 14px; left: 14px; transform: rotate(90deg);}
-        .s-br { bottom: 14px; right: 14px; transform: rotate(-10deg);}
+        .screw::after { content: ''; position: absolute; top: 5px; left: 2px; width: 8px; height: 2px; background: #1d1210; transform: rotate(45deg); }
+        .s-tl { top: 14px; left: 14px; } .s-tr { top: 14px; right: 14px; transform: rotate(20deg);}
+        .s-bl { bottom: 14px; left: 14px; transform: rotate(90deg);} .s-br { bottom: 14px; right: 14px; transform: rotate(-10deg);}
 
-        /* 音频线 */
         .audio-cable-connector {
-            position: absolute;
-            left: -12px;
-            bottom: 80px;
-            width: 14px; height: 28px;
-            background: #0d1b2a; 
-            border: 1px solid #000;
-            border-radius: 4px 0 0 4px;
-            box-shadow: inset 2px 2px 4px rgba(255,255,255,0.1);
-            z-index: 10;
+            position: absolute; left: -12px; bottom: 80px; width: 14px; height: 28px;
+            background: #0d1b2a; border: 1px solid #000; border-radius: 4px 0 0 4px;
+            box-shadow: inset 2px 2px 4px rgba(255,255,255,0.1); z-index: 10;
         }
-        .audio-cable-connector::after {
-            content: ''; position: absolute; bottom: -8px; left: 3px;
-            width: 8px; height: 8px; background: #ffb300;
-            border-radius: 0 0 2px 2px;
-        }
-        .audio-cable-svg {
-            position: absolute;
-            left: -150px; bottom: -300px;
-            width: 150px; height: 380px;
-            pointer-events: none; z-index: 5; opacity: 0.9;
-        }
+        .audio-cable-connector::after { content: ''; position: absolute; bottom: -8px; left: 3px; width: 8px; height: 8px; background: #ffb300; border-radius: 0 0 2px 2px; }
+        .audio-cable-svg { position: absolute; left: -150px; bottom: -300px; width: 150px; height: 380px; pointer-events: none; z-index: 5; opacity: 0.9; }
 
-        /* 面板通用 */
-        .faceplate {
-            background: #2b211e;
-            border: 1px solid #3e322e;
-            border-radius: 8px;
-            box-shadow: 
-                0 3px 8px rgba(0,0,0,0.6),
-                inset 0 1px 0 rgba(255,255,255,0.05);
-            position: relative;
-        }
+        .faceplate { background: #2b211e; border: 1px solid #3e322e; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05); position: relative; }
+        .panel-top { display: flex; justify-content: space-between; align-items: center; height: 180px; margin-bottom: 20px; padding: 15px; }
 
-        .panel-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 180px;
-            margin-bottom: 20px;
-            padding: 15px;
-        }
-
-        .screen-frame {
-            width: 250px; height: 150px;
-            background: #000;
-            border-radius: 6px;
-            border: 6px solid #333;
-            border-bottom-color: #444; border-right-color: #444;
-            box-shadow: inset 0 0 20px #000;
-            display: flex; justify-content: center; align-items: center;
-            position: relative; overflow: hidden;
-        }
-        .screen-frame::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%); pointer-events: none;
-        }
+        .screen-frame { width: 250px; height: 150px; background: #000; border-radius: 6px; border: 6px solid #333; border-bottom-color: #444; border-right-color: #444; box-shadow: inset 0 0 20px #000; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .screen-frame::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%); pointer-events: none; }
         
         .pixel-grid { display: grid; grid-template-columns: repeat(24, 1fr); grid-template-rows: repeat(16, 1fr); gap: 2px; width: 216px; height: 144px; }
         .pixel { background-color: #111; border-radius: 1px; transition: background-color 0.05s; }
         .pixel.active { box-shadow: 0 0 4px currentColor; z-index: 2; }
 
         .controls-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-left: 20px; height: 100%; }
-        
-        .brand-badge {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin-top: 5px; margin-bottom: 20px; text-align: center;
-            background: #1e1512; padding: 10px 18px;
-            border: 1px solid #5d4037; border-radius: 4px;
-            box-shadow: inset 0 0 10px #000, 0 1px 1px rgba(255,255,255,0.05);
-        }
+        .brand-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 5px; margin-bottom: 20px; text-align: center; background: #1e1512; padding: 10px 18px; border: 1px solid #5d4037; border-radius: 4px; box-shadow: inset 0 0 10px #000, 0 1px 1px rgba(255,255,255,0.05); }
         .title-sub { font-family: 'Brush Script MT', 'Segoe Script', cursive; font-size: 16px; color: #a1887f; opacity: 0.8; letter-spacing: 1px; margin-bottom: 2px; }
         .title-main { font-family: 'Times New Roman', Times, serif; font-weight: 900; font-size: 32px; letter-spacing: 3px; text-transform: uppercase; line-height: 0.9; color: #c5a065; text-shadow: 0 2px 5px rgba(0,0,0,1); background: linear-gradient(to bottom, #e6c895, #a68046); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
@@ -325,12 +221,7 @@
         @keyframes windKey { 0% { transform: rotate(0deg); } 30% { transform: rotate(120deg); } 40% { transform: rotate(120deg); } 70% { transform: rotate(240deg); } 80% { transform: rotate(240deg); } 100% { transform: rotate(360deg); } }
         .winder-container.winding .winder-key { animation: windKey 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards; }
 
-        .panel-bottom {
-            height: 80px;
-            background-color: #2a1e1b;
-            background-image: linear-gradient(45deg, #1a1210 25%, transparent 25%, transparent 75%, #1a1210 75%, #1a1210), linear-gradient(45deg, #1a1210 25%, transparent 25%, transparent 75%, #1a1210 75%, #1a1210);
-            background-size: 6px 6px; background-position: 0 0, 3px 3px; position: relative; display: flex; align-items: center; justify-content: center;
-        }
+        .panel-bottom { height: 80px; background-color: #2a1e1b; background-image: linear-gradient(45deg, #1a1210 25%, transparent 25%, transparent 75%, #1a1210 75%, #1a1210), linear-gradient(45deg, #1a1210 25%, transparent 25%, transparent 75%, #1a1210 75%, #1a1210); background-size: 6px 6px; background-position: 0 0, 3px 3px; position: relative; display: flex; align-items: center; justify-content: center; }
         .panel-bottom::after { content: ''; position: absolute; bottom: 10px; right: 15px; width: 60px; height: 4px; background: linear-gradient(90deg, #8d6e63, #d7ccc8, #8d6e63); border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 
         .card-title { font-weight: 900; font-size: 18px; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 3px solid #333; letter-spacing: -0.5px; }
@@ -345,83 +236,83 @@
 
     <div class="music-box-container" id="boxContainer">
         
-        <!-- 顶部面板 (底层) -->
         <div class="music-box-top">
             <div class="top-content-wrapper">
-                <!-- 左侧：装饰按钮 -->
                 <div class="top-decor-left top-btn"></div>
-                
-                <!-- 中间：点阵 + 出纸槽 -->
                 <div class="top-center-group">
+                    <!-- 1. 复古控制条 -->
+                    <div class="vintage-control-bar">
+                        <div class="metal-btn is-paused" id="miniControlBtn">
+                            <div class="symbol-play"></div>
+                            <div class="symbol-pause"></div>
+                        </div>
+                        <div class="scale-slot" id="progressTrack">
+                            <div class="scale-fill" id="progressFill"></div>
+                            <div class="scale-marks"></div>
+                        </div>
+                    </div>
+                    <!-- 2. 装饰点阵 -->
                     <div class="speaker-grille"></div>
+                    <!-- 3. 出纸口 -->
                     <div class="slot-recess"></div>
                 </div>
-                
-                <!-- 右侧：改为功能按钮 (Credits) -->
+                <!-- 右侧 Credits 按钮 -->
                 <div class="top-decor-right credits-btn-container" id="creditsBtn">
                     <div class="credits-btn-cap"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 正面面板 (顶层) -->
         <div class="music-box">
             <div class="audio-cable-connector"></div>
             <svg class="audio-cable-svg" viewBox="0 0 150 360">
                 <path d="M 150 0 C 130 50, 100 150, 30 360" stroke="#0a192f" stroke-width="12" fill="none" />
                 <path d="M 150 0 C 130 50, 100 150, 30 360" stroke="#1e3a5f" stroke-width="4" fill="none" stroke-dasharray="4 4" opacity="0.5"/>
             </svg>
-
-            <div class="screw s-tl"></div>
-            <div class="screw s-tr"></div>
-            <div class="screw s-bl"></div>
-            <div class="screw s-br"></div>
-
+            <div class="screw s-tl"></div> <div class="screw s-tr"></div> <div class="screw s-bl"></div> <div class="screw s-br"></div>
             <div class="panel-top faceplate">
                 <div class="screen-frame">
                     <div class="pixel-grid" id="pixelGrid"></div>
                 </div>
-
                 <div class="controls-area">
                     <div class="brand-badge">
                         <span class="title-sub">Echoes of the</span>
                         <span class="title-main">NATIONS</span>
                     </div>
-                    
                     <div class="winder-container" id="winder">
                         <div class="winder-base"></div>
-                        <div class="winder-key">
-                            <div class="winder-cap"></div>
-                        </div>
+                        <div class="winder-key"><div class="winder-cap"></div></div>
                     </div>
                 </div>
             </div>
-
             <div class="panel-bottom faceplate"></div>
         </div>
     </div>
 
     <script>
         const playlist = [
-            { id: 'france', title: "La Marseillaise", sub: "The National Anthem of France" },
-            { id: 'usa', title: "Battle Hymn of the Republic", sub: "Spirit of the American Civil War" },
-            { id: 'russia', title: "1812 Overture", sub: "Tchaikovsky - Patriotism in Russia" },
-            { id: 'europe', title: "Peer Gynt Suite No. 1, Op. 46", sub: "Grieg, inspired by Norwegian folk songs" },
+            { id: 'france', title: "La Marseillaise", sub: "National Anthem - France" },
+            { id: 'usa', title: "Battle Hymn of the Republic", sub: "Glory, Hallelujah - USA" },
+            { id: 'russia', title: "1812 Overture", sub: "Tchaikovsky - Russia" },
+            { id: 'europe', title: "Peer Gynt Suite No. 1, Op. 46", sub: "Morning Mood - Europe" },
             { id: 'america', title: "Symphony No. 9 in E Minor, Op. 95", sub: "From the New World - Americas" },
-            { id: 'china', title: "Ballad of the Great Wall", sub: "長城謠 - Republic of China, antifascism" },
-            { id: 'ghana', title: "Ghana Freedom", sub: "by E.T. Mensah, Ghana's independence, decolonization - African nationalism" },
-            { id: 'asia', title: "Auld Lang Syne", sub: "友谊地久天长 - China; 蛍の光 - Japan; 애국가 - Korea" }
+            { id: 'china', title: "Ballad of the Great Wall", sub: "长城谣 - China" },
+            { id: 'ghana', title: "Ghana Freedom", sub: "E.T. Mensah - Africa" },
+            { id: 'asia', title: "Auld Lang Syne", sub: "Hotaru no Hikari - Asia" }
         ];
 
         let currentIndex = 0;
         let zIndexGlobal = 1000;
-        let isPlaying = false;
+        let isPlaying = false; // 这里的 isPlaying 主要指“发条动画正在进行”
         let currentAudio = null;
 
         const winder = document.getElementById('winder');
         const creditsBtn = document.getElementById('creditsBtn');
         const pixelGrid = document.getElementById('pixelGrid');
         const boxContainer = document.getElementById('boxContainer');
+        const miniBtn = document.getElementById('miniControlBtn');
+        const progressTrack = document.getElementById('progressTrack');
+        const progressFill = document.getElementById('progressFill');
 
         const COLS = 24;
         const ROWS = 16;
@@ -459,53 +350,22 @@
 
         function drawIcon(type) {
             clearPixels();
-            
             if (type === 'credits') {
-                // === HKU (修正版：完全居中) ===
-                // 颜色：金色
                 const c = '#ffb300'; 
-                
-                // H (x: 4-7)
-                setRect(4, 4, 1, 9, c);  // 左竖线
-                setRect(7, 4, 1, 9, c);  // 右竖线
-                setRect(5, 8, 2, 1, c);  // 横杠
-
-                // K (x: 10-13)
-                setRect(10, 4, 1, 9, c); // 竖线
-                // 上撇
-                setPixel(13, 4, c); setPixel(13, 5, c); 
-                setPixel(12, 6, c); setPixel(11, 7, c);
-                // 中点
-                setPixel(11, 8, c);
-                // 下捺
-                setPixel(11, 9, c); setPixel(12, 10, c); 
-                setPixel(13, 11, c); setPixel(13, 12, c);
-
-                // U (x: 16-19)
-                setRect(16, 4, 1, 8, c); // 左竖线(短)
-                setRect(19, 4, 1, 8, c); // 右竖线(短)
-                setRect(17, 12, 2, 1, c); // 底横
-                setPixel(16, 12, c); setPixel(19, 12, c); // 圆角修正
+                setRect(4, 4, 1, 9, c); setRect(7, 4, 1, 9, c); setRect(5, 8, 2, 1, c);
+                setRect(10, 4, 1, 9, c); 
+                setPixel(13, 4, c); setPixel(13, 5, c); setPixel(12, 6, c); setPixel(11, 7, c); setPixel(11, 8, c);
+                setPixel(11, 9, c); setPixel(12, 10, c); setPixel(13, 11, c); setPixel(13, 12, c);
+                setRect(16, 4, 1, 8, c); setRect(19, 4, 1, 8, c); setRect(17, 12, 2, 1, c); setPixel(16, 12, c); setPixel(19, 12, c);
             }
             else if (type === 'ghana') {
-                // === 加纳国旗 (修正版) ===
-                // 红 (顶部 6行)
                 setRect(0, 0, COLS, 6, '#ce1126');
-                // 黄 (中间 5行)
                 setRect(0, 6, COLS, 5, '#fcd116');
-                // 绿 (底部 5行)
                 setRect(0, 11, COLS, 5, '#006b3f');
-                
-                // 黑星 (位于黄色区域中央)
-                const sx = 11, sy = 8;
-                // 星星顶部
+                const sx = 11, sy = 8; 
                 setPixel(sx, sy-2, '#000'); setPixel(sx+1, sy-2, '#000'); 
-                // 星星中部
-                setRect(sx-1, sy-1, 4, 1, '#000');
-                setRect(sx-2, sy, 6, 1, '#000');
-                // 星星腿部
-                setPixel(sx, sy+1, '#000'); setPixel(sx+1, sy+1, '#000'); 
-                setPixel(sx-1, sy+2, '#000'); setPixel(sx+2, sy+2, '#000');
+                setRect(sx-1, sy-1, 4, 1, '#000'); setRect(sx-2, sy, 6, 1, '#000');
+                setPixel(sx, sy+1, '#000'); setPixel(sx+1, sy+1, '#000'); setPixel(sx-1, sy+2, '#000'); setPixel(sx+2, sy+2, '#000');
             }
             else if (type === 'france') {
                 for(let y=0; y<ROWS; y++) { for(let x=0; x<COLS; x++) { if(x < 8) setPixel(x, y, '#002395'); else if(x < 16) setPixel(x, y, '#eeeeee'); else setPixel(x, y, '#ed2939'); } }
@@ -516,8 +376,7 @@
             else if (type === 'asia') {
                 const color = '#ffeb3b'; const cx = 11.5, cy = 7.5, r = 7;
                 for(let y=0; y<ROWS; y++) { for(let x=0; x<COLS; x++) { const d = Math.sqrt((x-cx)**2 + (y-cy)**2); if(d > r-1.5 && d < r+0.8) setPixel(x, y, color); } }
-                setRect(11, 1, 2, 14, color);
-                for(let i=0; i<6; i++) { setPixel(11-i, 8+i, color); setPixel(10-i, 8+i, color); setPixel(12+i, 8+i, color); setPixel(13+i, 8+i, color); }
+                setRect(11, 1, 2, 14, color); for(let i=0; i<6; i++) { setPixel(11-i, 8+i, color); setPixel(10-i, 8+i, color); setPixel(12+i, 8+i, color); setPixel(13+i, 8+i, color); }
             }
             else if (type === 'china') {
                 setRect(0, 0, COLS, ROWS, '#fe0000'); setRect(0, 0, 12, 8, '#000095'); setRect(5, 3, 2, 2, '#fff');
@@ -532,10 +391,52 @@
             }
         }
 
-        // --- 主发条逻辑 ---
+        // --- 交互逻辑修复 ---
+        
+        // 1. 播放控制
+        miniBtn.addEventListener('click', () => {
+            if (!currentAudio) return;
+            if (currentAudio.paused) {
+                currentAudio.play();
+                miniBtn.classList.remove('is-paused');
+                miniBtn.classList.add('is-playing');
+            } else {
+                currentAudio.pause();
+                miniBtn.classList.remove('is-playing');
+                miniBtn.classList.add('is-paused');
+            }
+        });
+
+        // 2. 进度条控制
+        progressTrack.addEventListener('click', (e) => {
+            if (!currentAudio) return;
+            const rect = progressTrack.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            if (isFinite(currentAudio.duration)) {
+                currentAudio.currentTime = currentAudio.duration * percent;
+                updateProgress();
+            }
+        });
+
+        function updateProgress() {
+            if (!currentAudio || !currentAudio.duration) {
+                progressFill.style.width = '0%'; return;
+            }
+            const percent = (currentAudio.currentTime / currentAudio.duration) * 100;
+            progressFill.style.width = percent + '%';
+        }
+
+        // 3. 发条点击逻辑 (修复：只要没在旋转动画中，随时可点)
         winder.addEventListener('click', () => {
-            if(isPlaying) return;
+            // 如果正在进行机械旋转(开头的3秒动画)，则不允许点击，防止穿模
+            if(winder.classList.contains('winding')) return;
+
+            // 设置为正在播放(动画)状态
             isPlaying = true;
+            
+            // 每次点击都重置动画类，以触发重绘
+            winder.classList.remove('winding');
+            void winder.offsetWidth; // 触发回流
             winder.classList.add('winding');
             
             setTimeout(() => {
@@ -543,53 +444,71 @@
                 drawIcon(song.id);
                 generateCard(song);
                 
+                // 切歌逻辑：停止旧的
                 if(currentAudio) {
                     currentAudio.pause();
-                    currentAudio.currentTime = 0;
+                    currentAudio.ontimeupdate = null;
+                    currentAudio.onended = null;
                 }
+
+                // 播放新的
                 const fileName = (currentIndex + 1) + ".mp3";
                 currentAudio = new Audio(fileName);
-                currentAudio.play().catch(e => console.log("Audio play failed:", e));
+                currentAudio.volume = 0.5; 
+
+                currentAudio.ontimeupdate = updateProgress;
+                currentAudio.onended = () => {
+                    miniBtn.classList.remove('is-playing');
+                    miniBtn.classList.add('is-paused');
+                    progressFill.style.width = '100%';
+                };
+
+                currentAudio.play()
+                    .then(() => {
+                        miniBtn.classList.remove('is-paused');
+                        miniBtn.classList.add('is-playing');
+                    })
+                    .catch(e => console.log("Audio play failed:", e));
 
                 currentIndex = (currentIndex + 1) % playlist.length;
             }, 500);
 
+            // 3秒后移除旋转类，允许再次点击
             setTimeout(() => {
                 winder.classList.remove('winding');
+                isPlaying = false; // 机械动作结束
             }, 3000);
         });
 
-        // --- Credits 按钮逻辑 ---
+        // 4. Credits 按钮逻辑 (修复：确保可点击)
         creditsBtn.addEventListener('click', () => {
-            if(isPlaying) return;
-            isPlaying = true;
+            // 点击即强制打断
+            if(winder.classList.contains('winding')) return;
             
-            // 如果有音乐在放，暂停它
+            // 停止音乐
             if(currentAudio) {
                 currentAudio.pause();
+                miniBtn.classList.remove('is-playing');
+                miniBtn.classList.add('is-paused');
+                progressFill.style.width = '0%';
             }
-
-            // 简单的按钮反馈动画已经在 CSS :active 处理了
             
-            setTimeout(() => {
-                drawIcon('credits'); // 绘制 HKU
-                generateCard({
-                    id: 'credits',
-                    title: "HKU CCGL 9066 Group Project",
-                    sub: "MusicBox - Made by Asher Lee\n2025"
-                });
-                // 不播放新音频，也不恢复旧音频，保持静默
-            }, 200);
+            // 简单动画反馈
+            creditsBtn.style.transform = "scale(0.95)";
+            setTimeout(() => creditsBtn.style.transform = "scale(1)", 100);
+
+            drawIcon('credits');
+            generateCard({
+                id: 'credits',
+                title: "HKU CCGL 9066 Group Project",
+                sub: "MusicBox - Made by Asher Lee\n2025"
+            });
         });
 
         function generateCard(songData) {
             const card = document.createElement('div');
             card.classList.add('card');
-            
-            // 特殊 ID 处理样式
-            if(songData.id === 'credits') {
-                card.classList.add('credits-style');
-            }
+            if(songData.id === 'credits') card.classList.add('credits-style');
             
             const endRot = (Math.random() * 10 - 5).toFixed(1) + 'deg';
             card.style.setProperty('--end-rot', endRot);
@@ -600,7 +519,7 @@
             if(songData.id === 'ghana') stripeColor = '#006b3f';
             if(songData.id === 'usa' || songData.id === 'america') stripeColor = '#b22234';
             if(songData.id === 'russia') stripeColor = '#0039a6';
-            if(songData.id === 'credits') stripeColor = '#007863'; // HKU Green
+            if(songData.id === 'credits') stripeColor = '#007863'; 
             
             card.innerHTML = `
                 <div class="flag-strip" style="background:${stripeColor}"></div>
@@ -613,7 +532,6 @@
 
             boxContainer.appendChild(card);
             void card.offsetWidth;
-            
             card.classList.add('printing');
 
             const t1 = card.querySelector('.t-title');
@@ -626,7 +544,6 @@
                         setTimeout(() => {
                             cursor.remove();
                             enableDrag(card);
-                            isPlaying = false;
                         }, 500);
                     });
                 });
